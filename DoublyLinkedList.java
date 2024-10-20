@@ -3,10 +3,10 @@ import java.util.NoSuchElementException;
 /**
  * Your implementation of a non-circular DoublyLinkedList with a tail pointer.
  *
- * @author SHIHAB MOINUDDIN
+ * @author Mark Jang
  * @version 1.0
- * @userid smoinuddin6 (i.e. gburdell3)
- * @GTID 903506408 (i.e. 900000000)
+ * @userid yjang95
+ * @GTID 903730588
  *
  * Collaborators: LIST ALL COLLABORATORS YOU WORKED WITH HERE
  *
@@ -18,6 +18,8 @@ public class DoublyLinkedList<T> {
     private DoublyLinkedListNode<T> head;
     private DoublyLinkedListNode<T> tail;
     private int size;
+
+
 
     // Do not add a constructor.
 
@@ -33,54 +35,60 @@ public class DoublyLinkedList<T> {
      * @throws java.lang.IllegalArgumentException  if data is null
      */
     public void addAtIndex(int index, T data) {
-        if (index < 0 || index > size) {
-            throw new IndexOutOfBoundsException("Index out of bounds!");
-        }
         if (data == null) {
-            throw new IllegalArgumentException("Data cannot be null!");
+            throw new IllegalArgumentException("cannot insert null dat into data structure");
         }
+
+        if (index < 0 || index > size) {
+            throw new IndexOutOfBoundsException("index is smaller than zero or bigger than the size");
+        }
+
+        DoublyLinkedListNode<T> newNode = new DoublyLinkedListNode<>(data);
         if (index == 0) {
-            DoublyLinkedListNode<T> newHead = new DoublyLinkedListNode<T>(data, null, head);
-            if (!(this.isEmpty())) {
-                head.setPrevious(newHead);
-            } else {
-                tail = newHead;
+            newNode.setNext(head);
+            if (head != null) {
+                head.setPrevious(newNode);
             }
-            head = newHead;
-            size++;
+            head = newNode;
+            if (tail == null) {
+                tail = newNode;
+            }
         } else if (index == size) {
-            DoublyLinkedListNode<T> newTail = new DoublyLinkedListNode<T>(data, tail, null);
-            if (!(this.isEmpty())) {
-                tail.setNext(newTail);
-            } else {
-                head = newTail;
+            newNode.setPrevious(tail);
+
+            if (tail != null) {
+                tail.setNext(newNode);
             }
-            tail = newTail;
-            size++;
+            tail = newNode;
+            if (head == null) {
+                head = newNode;
+            }
         } else {
             if (index <= ((size - 1) / 2)) {
-                DoublyLinkedListNode<T> curr = head;
-                for (int i = 0; i < index; i++) {
-                    curr = curr.getNext();
+                DoublyLinkedListNode<T> current = head;
+                for (int i = 0; i < index - 1; i++) {
+                    current = current.getNext();
                 }
-                DoublyLinkedListNode<T> addThis = new DoublyLinkedListNode<T>(data, curr.getPrevious(), curr);
-                (curr.getPrevious()).setNext(addThis);
-                (addThis.getNext()).setPrevious(addThis);
-                size++;
+                newNode.setPrevious(current);
+                newNode.setNext(current.getNext());
+                current.getNext().setPrevious(newNode);
+                current.setNext(newNode);
             } else {
-                DoublyLinkedListNode<T> curr = tail;
-                for (int i = size - 1; i > index; i--) {
-                    curr = curr.getPrevious();
+                DoublyLinkedListNode<T> current = tail;
+                for (int i = size - 1; i > index + 1; i--) {
+                    current = current.getPrevious();
                 }
-                DoublyLinkedListNode<T> addThis = new DoublyLinkedListNode<T>(data, curr.getPrevious(), curr);
-                curr.getPrevious().setNext(addThis);
-                curr.setPrevious(addThis);
-                size++;
+                newNode.setNext(current);
+                newNode.setPrevious(current.getPrevious());
+                current.getPrevious().setNext(newNode);
+                current.setPrevious(newNode);
             }
 
-        }
-    }
 
+        }
+
+        size++;
+    }
     /**
      * Adds the element to the front of the list.
      *
@@ -91,6 +99,7 @@ public class DoublyLinkedList<T> {
      */
     public void addToFront(T data) {
         addAtIndex(0, data);
+
     }
 
     /**
@@ -118,48 +127,53 @@ public class DoublyLinkedList<T> {
      */
     public T removeAtIndex(int index) {
         if (index < 0 || index >= size) {
-            throw new IndexOutOfBoundsException("Index out of bounds!");
+            throw new IndexOutOfBoundsException("index is smaller than zero or bigger than the size");
         }
+
+        DoublyLinkedListNode<T> current = head;
+
         if (index == 0) {
-            T data = head.getData();
-            head = head.getNext();
-            head.setPrevious(null);
-            size--;
-            return data;
+
+            // Removing the front element
+            head = current.getNext();
+
+            if (head != null) {
+                head.setPrevious(null);
+
+            }
+            if (tail == current) {
+                tail = null;
+            }
         } else if (index == size - 1) {
-            T data = tail.getData();
-            tail = tail.getPrevious();
-            tail.setNext(null);
-            size--;
-            return data;
+
+            current = tail;
+            tail = current.getPrevious();
+            if (tail != null) {
+                tail.setNext(null);
+            }
+            if (head == current) {
+                head = null;
+            }
         } else {
             if (index <= ((size - 1) / 2)) {
-                DoublyLinkedListNode<T> curr = head;
                 for (int i = 0; i < index; i++) {
-                    curr = curr.getNext();
+                    current = current.getNext();
                 }
-                T data = curr.getData();
-                DoublyLinkedListNode<T> prev = curr.getPrevious();
-                DoublyLinkedListNode<T> next = curr.getNext();
-                prev.setNext(next);
-                next.setPrevious(prev);
-                size--;
-                return data;
+                current.getPrevious().setNext(current.getNext());
+                current.getNext().setPrevious(current.getPrevious());
             } else {
-                DoublyLinkedListNode<T> curr = tail;
+                current = tail;
                 for (int i = size - 1; i > index; i--) {
-                    curr = curr.getPrevious();
+                    current = current.getPrevious();
                 }
-                T data = curr.getData();
-                DoublyLinkedListNode<T> prev = curr.getPrevious();
-                DoublyLinkedListNode<T> next = curr.getNext();
-                prev.setNext(next);
-                next.setPrevious(prev);
-                size--;
-                return data;
+                current.getPrevious().setNext(current.getNext());
+                current.getNext().setPrevious(current.getPrevious());
             }
         }
+        size--;
+        return current.getData();
     }
+
 
     /**
      * Removes and returns the first element of the list.
@@ -169,9 +183,13 @@ public class DoublyLinkedList<T> {
      * @return the data formerly located at the front of the list
      * @throws java.util.NoSuchElementException if the list is empty
      */
-    public T removeFromFront() {
+    public T removeFromFront() throws NoSuchElementException {
+        if (isEmpty()) {
+            throw new NoSuchElementException("the list is empty. cant remove anything if the list is empty");
+        }
         return removeAtIndex(0);
     }
+
 
     /**
      * Removes and returns the last element of the list.
@@ -181,9 +199,13 @@ public class DoublyLinkedList<T> {
      * @return the data formerly located at the back of the list
      * @throws java.util.NoSuchElementException if the list is empty
      */
-    public T removeFromBack() {
+    public T removeFromBack() throws NoSuchElementException {
+        if (isEmpty()) {
+            throw new NoSuchElementException("the list is empty. cant remove anything if the list is empty");
+        }
         return removeAtIndex(size - 1);
     }
+
 
     /**
      * Returns the element at the specified index. Don't forget to consider
@@ -197,20 +219,18 @@ public class DoublyLinkedList<T> {
      */
     public T get(int index) {
         if (index < 0 || index >= size) {
-            throw new IndexOutOfBoundsException("Index out of bounds!");
+            throw new IndexOutOfBoundsException("index is smaller than zero or bigger than the size");
         }
-        if (index == 0) {
-            return head.getData();
-        } else if (index == size - 1) {
-            return tail.getData();
-        } else {
-            DoublyLinkedListNode<T> curr = head;
-            for (int i = 0; i < index; i++) {
-                curr = curr.getNext();
-            }
-            return (T) curr.getData();
+
+        DoublyLinkedListNode<T> current = head;
+
+        for (int i = 0; i < index; i++) {
+            current = current.getNext();
         }
+
+        return current.getData();
     }
+
 
     /**
      * Returns whether or not the list is empty.
@@ -223,6 +243,7 @@ public class DoublyLinkedList<T> {
         return size == 0;
     }
 
+
     /**
      * Clears the list.
      *
@@ -233,8 +254,9 @@ public class DoublyLinkedList<T> {
     public void clear() {
         head = null;
         tail = null;
-        size = 0; 
+        size = 0;
     }
+
 
     /**
      * Removes and returns the last copy of the given data from the list.
@@ -250,24 +272,34 @@ public class DoublyLinkedList<T> {
      * @throws java.util.NoSuchElementException   if data is not found
      */
     public T removeLastOccurrence(T data) {
-         if (data == null) {
-             throw new IllegalArgumentException("Data cannot be null!");
-         }
-         DoublyLinkedListNode<T> curr = tail;
-        T returnThis = null;
-         for (int i = size - 1; i > 0; i--) {
-             if ((curr.getData()).equals(data)) {
-                 returnThis = curr.getData();
-                 removeAtIndex(i);
-                 break;
-             }
-             curr = curr.getPrevious();
-         }
-         if (returnThis == null) {
-            throw new IllegalArgumentException("Data was not found!");
-         }
-         return returnThis;
+        if (data == null) {
+            throw new IllegalArgumentException("cannot insert null dat into data structure");
+        }
+
+        DoublyLinkedListNode<T> current = tail;
+
+        while (current != null && !current.getData().equals(data)) {
+            current = current.getPrevious();
+        }
+
+        if (current == null) {
+            throw new NoSuchElementException("the list is empty. cant remove anything if the list is empty");
+        }
+
+        if (current == head) {
+            return removeFromFront();
+        } else if (current == tail) {
+            return removeFromBack();
+        } else {
+            current.getPrevious().setNext(current.getNext());
+            current.getNext().setPrevious(current.getPrevious());
+
+
+            size--;
+            return current.getData();
+        }
     }
+
 
     /**
      * Returns an array representation of the linked list. If the list is
@@ -279,18 +311,17 @@ public class DoublyLinkedList<T> {
      * list in the same order
      */
     public Object[] toArray() {
-        Object[] array = (T[]) new Object[size];
-        if (!isEmpty()) {
-            DoublyLinkedListNode<T> curr = head;
-            for (int i = 0; i < size; i++) {
-                array[i] = curr.getData();
-                curr = curr.getNext();
-            }
-            return array;
-        } else {
-            return array;
+        Object[] arr = new Object[size];
+        DoublyLinkedListNode<T> current = head;
+
+        for (int i = 0; i < size; i++) {
+            arr[i] = current.getData();
+            current = current.getNext();
         }
+
+        return arr;
     }
+
 
     /**
      * Returns the head node of the list.
